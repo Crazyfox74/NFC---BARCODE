@@ -1,0 +1,23 @@
+D:/Freertos tests/NFC_and_Barcode_STM32/CMSIS/inc/core_cm3.h:1308:22:NVIC_EnableIRQ	16	static
+D:/Freertos tests/NFC_and_Barcode_STM32/CMSIS/inc/core_cm3.h:1320:22:NVIC_DisableIRQ	16	static
+D:/Freertos tests/NFC_and_Barcode_STM32/CMSIS/inc/core_cm3.h:1390:22:NVIC_SetPriority	16	static
+../SPI/src/spi.c:22:6:PN532_SPIInit	32	static
+../SPI/src/spi.c:101:6:SPI_SetDataSize	16	static
+../SPI/src/spi.c:115:6:SPI_Set_SPI_RCC	16	static
+../SPI/src/spi.c:125:6:SPI_Set_GPIO_RCC	16	static
+../SPI/src/spi.c:145:6:SPI_Config	24	static
+../SPI/src/spi.c:168:6:SPI_Set_Speed	16	static
+../SPI/src/spi.c:184:6:SPI_CS_Set	16	static
+../SPI/src/spi.c:190:6:SPI_CS_Reset	16	static
+../SPI/src/spi.c:196:14:SPI_Send8Data	32	static
+../SPI/src/spi.c:210:14:SPI_Receive8Data	32	static
+../SPI/src/spi.c:225:14:SPI_Send16Data	32	static
+../SPI/src/spi.c:240:14:SPI_Receive16Data	32	static
+../SPI/src/spi.c:256:6:SPI_Send_Recv	24	static
+../SPI/src/spi.c:275:6:SpiSendRecvFlash	32	static
+../SPI/src/spi.c:286:6:SPI_GPIO_Init	4	static
+../SPI/src/spi.c:314:13:spi1_gpio_init	16	static
+../SPI/src/spi.c:343:6:SPI_FLASH_INIT	32	static
+../SPI/src/spi.c:390:6:SPI2_IRQHandler	16	static
+../SPI/src/spi.c:421:6:SPI_FLASH_CONFIG	32	static
+../SPI/src/spi.c:497:6:SPI_FLASH_DECONFIG	4	static

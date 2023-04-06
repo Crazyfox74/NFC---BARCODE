@@ -1,0 +1,3 @@
+../SPI/src/flashUtils.c:24:9:CheckMemoryFlash	24	static
+../SPI/src/flashUtils.c:54:6:Set_Started_Address	24	static
+../SPI/src/flashUtils.c:68:6:Write_data_2Flash	4	static

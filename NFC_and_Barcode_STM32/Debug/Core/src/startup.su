@@ -1,0 +1,2 @@
+../Core/src/startup.c:22:6:TimingDelay_Decrement	4	static
+../Core/src/startup.c:34:6:Delay	16	static

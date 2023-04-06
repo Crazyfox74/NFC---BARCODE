@@ -1,0 +1,8 @@
+../USART/src/usart.c:28:6:Usart2Init	32	static
+../USART/src/usart.c:72:6:Usart2_SendData	24	static
+../USART/src/usart.c:85:6:SCAN_UsartInit	32	static
+../USART/src/usart.c:127:6:SCAN_SendCMD	24	static
+../USART/src/usart.c:139:6:USART_NUM_IRQHandler	8	static
+../USART/src/usart.c:163:13:FIFO_GetNextData	24	static
+../USART/src/usart.c:177:13:Date_GetNextDate	24	static
+../USART/src/usart.c:187:6:USART2_IRQHandler	8	static

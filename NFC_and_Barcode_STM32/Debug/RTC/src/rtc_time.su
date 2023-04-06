@@ -1,0 +1,3 @@
+../RTC/src/rtc_time.c:3:6:timer_to_cal	32	static
+../RTC/src/rtc_time.c:29:15:cal_to_timer	40	static
+../RTC/src/rtc_time.c:46:9:convert_time_from_android	96	static

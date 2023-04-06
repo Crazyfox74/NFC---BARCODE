@@ -1,0 +1,4 @@
+../CMSIS/src/system_stm32f10x.c:212:6:SystemInit	8	static
+../CMSIS/src/system_stm32f10x.c:251:6:SystemCoreClockUpdate	24	static
+../CMSIS/src/system_stm32f10x.c:364:13:SetSysClock	8	static
+../CMSIS/src/system_stm32f10x.c:932:13:SetSysClockTo72	16	static

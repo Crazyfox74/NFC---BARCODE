@@ -1,0 +1,11 @@
+../LCD/src/LCD.c:35:6:SCAN_SumToString	24	static
+../LCD/src/LCD.c:52:6:LCD_CtrlLinesConfig	32	static
+../LCD/src/LCD.c:94:9:I2C_SingleRandomWrite	24	static
+../LCD/src/LCD.c:137:6:LCD_SetCursor	24	static
+../LCD/src/LCD.c:156:6:LCD_WriteData	24	static
+../LCD/src/LCD.c:175:6:LCD_WriteString	32	static
+../LCD/src/LCD.c:185:6:LCD_RunStringDevInfo	48	static
+../LCD/src/LCD.c:250:6:LCD_RunStringBARCode	40	static
+../LCD/src/LCD.c:293:6:LCD_RunStringNFCCode	40	static
+../LCD/src/LCD.c:335:6:LCD_Init	16	static
+../LCD/src/LCD.c:365:6:LCD_DisplaySum	16	static
