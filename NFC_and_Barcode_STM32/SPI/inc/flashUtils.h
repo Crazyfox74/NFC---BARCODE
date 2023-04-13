@@ -19,6 +19,8 @@
 uint8_t CheckMemoryFlash(uint32_t addr_check);
 
 void Set_Started_Address(uint32_t addr, uint16_t cnt_flash, uint8_t* pBuf);
-void Write_data_2Flash(void);
+void Write_data_2Flash(uint32_t addr, uint16_t cnt_flash, uint8_t* pBuf);
+void Write_Stat_Reg();
+void Set_Cnt_to_Flash(uint32_t addr, uint16_t cnt_flash, uint8_t* pBuf);
 
 #endif /* INC_FLASHUTILS_H_ */

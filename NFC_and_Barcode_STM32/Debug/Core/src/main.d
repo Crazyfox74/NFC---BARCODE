@@ -16,6 +16,8 @@ Core/src/main.o: ../Core/src/main.c \
  D:/Freertos\ tests/NFC_and_Barcode_STM32/SPL/inc/stm32f10x_tim.h \
  D:/Freertos\ tests/NFC_and_Barcode_STM32/SPL/inc/stm32f10x_spi.h \
  D:/Freertos\ tests/NFC_and_Barcode_STM32/SPI/inc/spiFlash.h \
+ D:/Freertos\ tests/NFC_and_Barcode_STM32/SPI/inc/flashUtils.h \
+ D:/Freertos\ tests/NFC_and_Barcode_STM32/SPI/inc/spiFlash.h \
  D:/Freertos\ tests/NFC_and_Barcode_STM32/NFC/inc/nfcpn532.h \
  D:/Freertos\ tests/NFC_and_Barcode_STM32/LCD/inc/LCD.h \
  D:/Freertos\ tests/NFC_and_Barcode_STM32/SPL/inc/stm32f10x_i2c.h \
@@ -38,6 +40,8 @@ D:/Freertos\ tests/NFC_and_Barcode_STM32/SPI/inc/spi.h:
 D:/Freertos\ tests/NFC_and_Barcode_STM32/Core/inc/perif.h:
 D:/Freertos\ tests/NFC_and_Barcode_STM32/SPL/inc/stm32f10x_tim.h:
 D:/Freertos\ tests/NFC_and_Barcode_STM32/SPL/inc/stm32f10x_spi.h:
+D:/Freertos\ tests/NFC_and_Barcode_STM32/SPI/inc/spiFlash.h:
+D:/Freertos\ tests/NFC_and_Barcode_STM32/SPI/inc/flashUtils.h:
 D:/Freertos\ tests/NFC_and_Barcode_STM32/SPI/inc/spiFlash.h:
 D:/Freertos\ tests/NFC_and_Barcode_STM32/NFC/inc/nfcpn532.h:
 D:/Freertos\ tests/NFC_and_Barcode_STM32/LCD/inc/LCD.h:

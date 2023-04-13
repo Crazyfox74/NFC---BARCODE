@@ -59,6 +59,11 @@ uint32_t nfc_to_flash[2];
 uint8_t data_to_flash[16];
 uint8_t addr_to_flash[4];
 
+uint8_t wr_test_buff[256];
+uint8_t rd_test_buff[256];
+uint32_t wr_test_addr;
+uint8_t addr_to_wr[4];
+
 
 NVIC_InitTypeDef        NVIC_InitTmr1Structure;
 EXTI_InitTypeDef		EXTI_InitExtiStruct;
@@ -672,25 +677,37 @@ void spi_gpio_init(void){
 
 
 
-void bcode_conv_to_flash(uint32_t rtc_time, char *bar_buff){
+uint64_t bcode_conv_to_flash(uint32_t rtc_time, char *bar_buff){
 
+	uint8_t s;
 	char *pBar = bar_buff;
-	for(int i = 0; i < strlen(barcode); i++){
+	for(int i = 0; i < 13; i++){
 		barcode[i] = *pBar++;
 	}
-	bcode = (uint64_t)atol(barcode);
-/*
-	if(bcode > 0xffffffffff){
-		bcode_to_flash[0]=rtc_time;
-		bcode_to_flash[1]=(uint32_t)(bcode >> 16);
-		bcode_to_flash[2]=(uint32_t)(bcode >> 0);
-	}else{
 
-	bcode_to_flash[0]=rtc_time;
-	bcode_to_flash[1]=(uint32_t)(bcode >> 8);
-	bcode_to_flash[2]=(uint32_t)(bcode >> 0);
+	for(int a=0;a<7;a++){
+		if(a==0){
+			s=barcode[a]-0x30;
+			s<<=4;
+			s|=barcode[a+1]-0x30;
+		}
+		if(a>0 && a<=5){
+			s=barcode[a*2]-0x30;
+			s<<=4;
+			s|=barcode[a*2+1]-0x30;
+		}
+		if(a==6){
+			s=barcode[a*2]-0x30;
+			s<<=4;
+		}
+
+		bcode<<=8;
+		bcode|=(uint64_t)s;
+
 	}
-*/
+
+
+	return bcode;
 
 }
 
@@ -703,19 +720,62 @@ void nfc_conv_to_flash(uint32_t rtc_time, uint32_t nfc_tag ){
 
 void data_conv2Flash(uint32_t rtc_time, uint64_t data ){
 
-	uint8_t *p_rtc = (uint8_t)&rtc_time;
-	for(int i = 0; i < 4; i++){
-		data_to_flash[i] = p_rtc[i];
-	}
-	uint8_t *p_data = (uint8_t)&data;
-	for(int i = 4; i < 12; i++){
-		data_to_flash[i] = p_data[i];
-	}
+
+	data_to_flash[0]=(rtc_time >> 24) & 0xFF;
+	data_to_flash[1]=(rtc_time >> 16) & 0xFF;
+	data_to_flash[2]=(rtc_time >> 8) & 0xFF;
+	data_to_flash[3]=rtc_time & 0xFF;
+
+	data_to_flash[4]=(data >> 48) & 0xFF;
+	data_to_flash[5]=(data >> 40) & 0xFF;
+	data_to_flash[6]=(data >> 32) & 0xFF;
+	data_to_flash[7]=(data >> 24) & 0xFF;
+	data_to_flash[8]=(data >> 16) & 0xFF;
+	data_to_flash[9]=(data >> 8) & 0xFF;
+	data_to_flash[10]=data & 0xFF;
+
+
+}
+
+void nfc_conv2Flash(uint32_t rtc_time, uint32_t data ){
+
+
+	data_to_flash[0]=(rtc_time >> 24) & 0xFF;
+	data_to_flash[1]=(rtc_time >> 16) & 0xFF;
+	data_to_flash[2]=(rtc_time >> 8) & 0xFF;
+	data_to_flash[3]=rtc_time & 0xFF;
+
+	data_to_flash[4]=(data >> 24) & 0xFF;
+	data_to_flash[5]=(data >> 16) & 0xFF;
+	data_to_flash[6]=(data >> 8) & 0xFF;
+	data_to_flash[7]=data & 0xFF;
+
+
 }
 
 void addr_conv2Flash(uint32_t addr_flash){
 
-//	uint8_t
-	memcpy(addr_to_flash, &addr_flash, sizeof(uint32_t));
+	addr_to_flash[0]=(addr_flash >> 24) & 0xFF;
+	addr_to_flash[1]=(addr_flash >> 16) & 0xFF;
+	addr_to_flash[2]=(addr_flash >> 8) & 0xFF;
+	addr_to_flash[3]=addr_flash & 0xFF;
 
+}
+
+uint32_t flash_conv2_addr(uint8_t *padBuf){
+
+	uint32_t addr2_wr = (padBuf[0] << 24) | (padBuf[1] << 16) | (padBuf[2] << 8) | padBuf[3];
+	return addr2_wr;
+
+}
+
+
+void wr_test_prepare(uint32_t addr_wr, uint16_t cnt){
+
+	wr_test_addr = addr_wr;
+
+	for(int i = 0; i < cnt ;i++){
+		wr_test_buff[i] = wr_test_addr;
+		wr_test_addr++;
+	}
 }

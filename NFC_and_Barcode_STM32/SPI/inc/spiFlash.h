@@ -33,6 +33,7 @@ void spiFlash_Read(uint32_t dwAddrRead, uint16_t bCnt, uint8_t *pBuf);
 uint8_t spiFlash_write( uint32_t dwAddrWrite, uint16_t bCnt, uint8_t* pBuf );
 uint8_t spiFlash_eraseSector( uint32_t dwSectAddr );
 uint8_t spiFlash_wrtEnbl();
+uint8_t spiFlash_wrtStatReg();
 
 uint32_t spiFlash_readJEDECDesc( void );
 

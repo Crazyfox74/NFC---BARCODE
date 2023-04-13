@@ -246,6 +246,38 @@ uint32_t jedec_test = 0;
 
 extern volatile uint8_t SpiActive;
 
+extern uint16_t stat_reg1;
+extern uint16_t stat_reg2;
+extern uint8_t wr_en;
+extern uint8_t wr_stat_en;
+
+uint8_t res_erase;
+uint32_t erase_addr;
+uint8_t cnt_flash_t;
+extern uint8_t wr_test_buff[256];
+extern uint8_t rd_test_buff[255];
+uint64_t bcdflash;
+uint64_t nfctflash;
+
+uint32_t bcd_addr_start;		//адрес отсчета для штрих-кодов
+uint32_t bcd_max_cnt_addr;		//макс количество записей штрих-кодов
+uint32_t bcd_cnt_addr_start;	//количество записей штрих-кодов
+uint32_t nfc_addr_start;	//адрес отсчета для меток
+uint32_t nfc_max_cnt_addr;	//макс количество записей меток
+uint32_t nfc_cnt_addr_start;	//количество записей меток
+uint8_t cnt_addr_2Flash;	//количество байт для адреса
+uint8_t cnt_for_addr;
+uint8_t cnt_4cnt;	//количество байт для количества записей
+uint8_t max_record_flash;	//количество байт для макс количества записей
+uint8_t val_max_cnt;	//значение макс количества записей
+uint8_t val_start_cnt;	//начальное значение количества записей
+uint32_t bar_flash_addr;	//адрес для записи штрих-кодов
+uint32_t nfc_flash_addr;	//адрес для записи метки
+
+uint8_t start_nfc_addr[4]={0x00,0x00,0x20,0x00};	//начальный адрес для меток
+uint8_t start_bar_addr[4]={0x00,0x00,0x10,0x00};	//начальный адрес для штрих-кодов
+
+
 void LCD_PN532_CreateRunInfoString(){
 
 	strcpy( s_pn_info, s_pn_fchip);	//копирую первую заготовку в пустую строку
@@ -442,21 +474,99 @@ int main(void){
 				SpiActive = 0;
 
 
-
-
 				while(SpiActive !=0 && SPI_I2S_GetFlagStatus(SPI2,SPI_SR_BSY) != RESET){}
 				SPI_FLASH_CONFIG();
-				jedec_test = spiFlash_readJEDECDesc();
+bcd_addr_start = 0;
+bcd_cnt_addr_start = 32;
+bcd_max_cnt_addr = 64;
+
+nfc_addr_start = 96;
+nfc_cnt_addr_start = 128;
+nfc_max_cnt_addr = 160;
+
+cnt_addr_2Flash = 4;
+cnt_4cnt = 1;
+
+val_max_cnt = 255;
+val_start_cnt = 0;
+
+erase_addr = 0;
+cnt_flash_t = 255;
+//uint8_t* pmax_cnt = val_max_cnt;
+//uint8_t *pstart_cnt = val_start_cnt;
+
+/*	формирование начального адреса, количества и максимального количества записей(эти функции можно применять и для установки нового адреса или количества
+ * для записи новых данных
+			Set_Started_Address(bcd_addr_start, cnt_addr_2Flash, start_bar_addr);	//начальный адрес для штрих-кодов
+			Set_Cnt_to_Flash(bcd_cnt_addr_start, cnt_4cnt, &val_start_cnt);	//количество штрих-кодов
+			Set_Cnt_to_Flash(bcd_max_cnt_addr, cnt_4cnt, &val_max_cnt);	//макс количесто штрих-кодов
+
+			Set_Started_Address(nfc_addr_start, cnt_addr_2Flash, start_nfc_addr);	//начальный адрес для штрих-кодов
+			Set_Cnt_to_Flash(nfc_cnt_addr_start, cnt_4cnt, &val_start_cnt);	//количество штрих-кодов
+			Set_Cnt_to_Flash(nfc_max_cnt_addr, cnt_4cnt, &val_max_cnt);	//макс количесто штрих-кодов
+
+*/
+
+			memset(rd_test_buff,0x00,sizeof(rd_test_buff));	//получение значение адреса для записи
+			spiFlash_Read(bcd_addr_start, cnt_addr_2Flash, rd_test_buff);
+			bar_flash_addr = flash_conv2_addr(rd_test_buff);
+
+			memset(rd_test_buff,0x00,sizeof(rd_test_buff));	//получение значение адреса для записи
+			spiFlash_Read(nfc_addr_start, cnt_addr_2Flash, rd_test_buff);
+			nfc_flash_addr = flash_conv2_addr(rd_test_buff);
 
 
+		/*		while(SpiActive !=0 && SPI_I2S_GetFlagStatus(SPI2,SPI_SR_BSY) != RESET){}
+				SPI_FLASH_CONFIG();
+
+				erase_addr = 0;
+				cnt_flash_t = 255;
+
+				for(int a = 0; a<4;a++){
+					wr_en = spiFlash_wrtEnbl();
+					stat_reg1 = spiFlash_readStatus(CMD_READ_STATUS_REG1);
+					stat_reg2 = spiFlash_readStatus(CMD_READ_STATUS_REG2);
+					if(stat_reg1!=2){
+						wr_stat_en = spiFlash_wrtStatReg();
+						stat_reg1 = spiFlash_readStatus(CMD_READ_STATUS_REG1);
+						stat_reg2 = spiFlash_readStatus(CMD_READ_STATUS_REG2);
+						wr_en = spiFlash_wrtEnbl();
+						stat_reg1 = spiFlash_readStatus(CMD_READ_STATUS_REG1);
+						stat_reg2 = spiFlash_readStatus(CMD_READ_STATUS_REG2);
+					}
+
+					res_erase = spiFlash_eraseSector(erase_addr);
+					do {
+						stat_reg1 = spiFlash_readStatus(CMD_READ_STATUS_REG1);
+					} while (stat_reg1 & 0x01 );
+
+					memset(rd_test_buff,0x00,sizeof(rd_test_buff));
+				//	for(int k = 0; k< 254; k++){
+					spiFlash_Read(erase_addr, cnt_flash_t, rd_test_buff);
+					erase_addr = erase_addr + 4096;
+				}
+
+*/
+
+			/*	jedec_test = spiFlash_readJEDECDesc();
+				wr_test_prepare(erase_addr, cnt_flash_t);
+				erase_addr = 0;
+
+			//	}
+
+				wr_en = spiFlash_wrtEnbl();
+				stat_reg1 = spiFlash_readStatus(CMD_READ_STATUS_REG1);
+				stat_reg2 = spiFlash_readStatus(CMD_READ_STATUS_REG2);
+				spiFlash_write(erase_addr, cnt_flash_t, wr_test_buff);
+				do {
+					stat_reg1 = spiFlash_readStatus(CMD_READ_STATUS_REG1);
+				} while (stat_reg1 & 0x01 );
+
+				memset(rd_test_buff,0x00,sizeof(rd_test_buff));
+				spiFlash_Read(erase_addr, cnt_flash_t, rd_test_buff);
+*/
 
 				SpiActive = 0;
-
-
-
-
-
-
 
 
 			while(SpiActive !=0 && SPI_I2S_GetFlagStatus(SPI2,SPI_SR_BSY) != RESET){}
@@ -830,6 +940,42 @@ EnableTimer1Interrupt();
 					memset(g_sBarCode,0,strlen(g_sBarCode));
 					  strlcpy ( g_sBarCode, (const char *)s_lcd_barcode_read, USB_STATE_LEN );
 					  strcat(g_sBarCode,pBuffer );
+
+
+
+						timer = RTC_GET_COUNTER();
+						timer_to_cal(timer, &rtc_time);
+						tim = cal_to_timer(&rtc_time);
+						bcdflash = bcode_conv_to_flash(tim, g_sBuffer);
+						data_conv2Flash(tim, bcdflash);
+
+					//	while(SpiActive !=0 && SPI_I2S_GetFlagStatus(SPI2,SPI_SR_BSY) != RESET){}
+					//	SPI_FLASH_CONFIG();
+
+
+
+
+
+						s_cal_data[0] = 0x30 + (rtc_time.year/1000%10);
+						s_cal_data[1] = 0x30 + (rtc_time.year/100%10);
+						s_cal_data[2] = 0x30 + (rtc_time.year/10%10);
+						s_cal_data[3] = 0x30 + (rtc_time.year%10);
+
+						s_cal_data[5] = 0x30 + (rtc_time.mon/10);
+						s_cal_data[6] = 0x30 + (rtc_time.mon%10);
+
+						s_cal_data[8] = 0x30 + (rtc_time.mday/10);
+						s_cal_data[9] = 0x30 + (rtc_time.mday%10);
+
+						s_cal_data[11] = 0x30 + (rtc_time.hour/10);
+						s_cal_data[12] = 0x30 + (rtc_time.hour%10);
+
+						s_cal_data[14] = 0x30 + (rtc_time.min/10);
+						s_cal_data[15] = 0x30 + (rtc_time.min%10);
+
+						s_cal_data[17] = 0x30 + (rtc_time.sec/10);
+						s_cal_data[18] = 0x30 + (rtc_time.sec%10);
+
 					//strlcpy ( g_sBarCode, (const char *)pBuffer, USB_STATE_LEN );
 		/*
 					Usart2_SendData(s_pc_barcode,strlen(s_pc_barcode));
@@ -859,9 +1005,7 @@ EnableTimer1Interrupt();
 
 
 
-					timer = RTC_GET_COUNTER();
-					timer_to_cal(timer, &rtc_time);
-					tim = cal_to_timer(&rtc_time);
+
 
 
 		/*
@@ -875,25 +1019,7 @@ EnableTimer1Interrupt();
 
 					//*xxx*yyyy-MM-dd HH:mm:ss
 
-					s_cal_data[0] = 0x30 + (rtc_time.year/1000%10);
-					s_cal_data[1] = 0x30 + (rtc_time.year/100%10);
-					s_cal_data[2] = 0x30 + (rtc_time.year/10%10);
-					s_cal_data[3] = 0x30 + (rtc_time.year%10);
 
-					s_cal_data[5] = 0x30 + (rtc_time.mon/10);
-					s_cal_data[6] = 0x30 + (rtc_time.mon%10);
-
-					s_cal_data[8] = 0x30 + (rtc_time.mday/10);
-					s_cal_data[9] = 0x30 + (rtc_time.mday%10);
-
-					s_cal_data[11] = 0x30 + (rtc_time.hour/10);
-					s_cal_data[12] = 0x30 + (rtc_time.hour%10);
-
-					s_cal_data[14] = 0x30 + (rtc_time.min/10);
-					s_cal_data[15] = 0x30 + (rtc_time.min%10);
-
-					s_cal_data[17] = 0x30 + (rtc_time.sec/10);
-					s_cal_data[18] = 0x30 + (rtc_time.sec%10);
 
 
 					strncat(s_scan_d_c, s_cal_data, 19);
@@ -940,6 +1066,12 @@ EnableTimer1Interrupt();
 									Usart2_SendData(s_newline,strlen(s_newline));
 
 									decuid = UIDResponse(&uid[0], uidLength);
+
+									timer = RTC_GET_COUNTER();
+					 				timer_to_cal(timer, &rtc_time);
+					 				tim = cal_to_timer(&rtc_time);
+								//	nfctflash = (uint64_t)decuid;
+									nfc_conv2Flash(tim, decuid);
 
 									s_pn_uiddecdata[0] = 0x30+(decuid/1000000000);
 									s_pn_uiddecdata[1] = 0x30+(decuid/100000000%10);

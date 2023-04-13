@@ -223,9 +223,12 @@ void PN532_WriteTagtoHex();
 
 void spi_gpio_init(void);
 
-void bcode_conv_to_flash(uint32_t rtc_time, char *bar_buff);
+uint64_t bcode_conv_to_flash(uint32_t rtc_time, char *bar_buff);
 void nfc_conv_to_flash(uint32_t rtc_time, uint32_t nfc_tag );
 void data_conv2Flash(uint32_t rtc_time, uint64_t data );
+void nfc_conv2Flash(uint32_t rtc_time, uint32_t data );
 void addr_conv2Flash(uint32_t addr_flash);
+void wr_test_prepare(uint32_t addr_wr, uint16_t cnt);
+uint32_t flash_conv2_addr(uint8_t *padBuf);
 
 #endif /* INC_PERIF_H_ */

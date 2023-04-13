@@ -269,6 +269,7 @@ void SPI_Send_Recv(uint8_t *buf_tx, uint8_t *buf_rx, uint16_t len)
 	//_SPI->DR = 5;
 	else
 		*(uint8_t*)&SPI2->DR = SPI_EMPTY_BYTE;
+//	while(SpiActive);
 }
 
 
@@ -279,7 +280,7 @@ void SpiSendRecvFlash(uint8_t **a_buf_tx, uint8_t **a_buf_rx, uint16_t *a_buf_le
 
 				SPI_Send_Recv(a_buf_tx[i], a_buf_rx[i], a_buf_len[i]);
 
-		//		while(SpiActive);
+				while(SpiActive);
 			}
 }
 
@@ -406,11 +407,15 @@ void SPI2_IRQHandler(void)
 
 			usBufPosTx++;
 		}
+	/*	else{
+			GPIO_WriteBit(SPI_GPIO_PORT, SPI_FLASH_NSS,1);
+		}*/
 	}
 
 	if (++usBufPosRx >= usBufCnt)
 	{
 		SpiActive = 0;
+	//	GPIO_WriteBit(SPI_GPIO_PORT, SPI_FLASH_NSS,1);
 		//SPI_ON_READY_ISR_CB(0);
 	}
 
@@ -446,7 +451,7 @@ void SPI_FLASH_CONFIG(void)
 	/* Initialize the SPI_CPHA member */
 	SPI_FLASH_Initstruct.SPI_CPHA = SPI_CPHA_1Edge;
 	/* Initialize the SPI_NSS member */
-	SPI_FLASH_Initstruct.SPI_NSS = SPI_NSS_Hard;//SPI_NSS_Hard;//SPI_NSS_Soft;//SPI_NSS_Hard;
+	SPI_FLASH_Initstruct.SPI_NSS = SPI_NSS_Soft;//SPI_NSS_Hard;//SPI_NSS_Soft;//SPI_NSS_Hard;
 	/* Initialize the SPI_BaudRatePrescaler member */
 	SPI_FLASH_Initstruct.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_256;//SPI_BaudRatePrescaler_256;//SPI_BaudRatePrescaler_4;
 	/* Initialize the SPI_FirstBit member */

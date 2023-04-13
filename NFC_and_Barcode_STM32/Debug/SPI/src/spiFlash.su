@@ -1,6 +1,7 @@
-../SPI/src/spiFlash.c:32:6:spiFlash_read	24	static
-../SPI/src/spiFlash.c:54:9:spiFlash_write	32	static
-../SPI/src/spiFlash.c:82:9:spiFlash_readStatus	24	static
-../SPI/src/spiFlash.c:99:9:spiFlash_wrtEnbl	16	static
-../SPI/src/spiFlash.c:114:10:spiFlash_readJEDECDesc	16	static
-../SPI/src/spiFlash.c:139:9:spiFlash_eraseSector	24	static
+../SPI/src/spiFlash.c:33:6:spiFlash_Read	24	static
+../SPI/src/spiFlash.c:56:9:spiFlash_write	32	static
+../SPI/src/spiFlash.c:84:9:spiFlash_readStatus	24	static
+../SPI/src/spiFlash.c:103:9:spiFlash_wrtEnbl	16	static
+../SPI/src/spiFlash.c:121:9:spiFlash_wrtStatReg	16	static
+../SPI/src/spiFlash.c:140:10:spiFlash_readJEDECDesc	16	static
+../SPI/src/spiFlash.c:165:9:spiFlash_eraseSector	24	static

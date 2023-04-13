@@ -14,10 +14,10 @@ D:/Freertos tests/NFC_and_Barcode_STM32/CMSIS/inc/core_cm3.h:1390:22:NVIC_SetPri
 ../SPI/src/spi.c:225:14:SPI_Send16Data	32	static
 ../SPI/src/spi.c:240:14:SPI_Receive16Data	32	static
 ../SPI/src/spi.c:256:6:SPI_Send_Recv	24	static
-../SPI/src/spi.c:275:6:SpiSendRecvFlash	32	static
-../SPI/src/spi.c:286:6:SPI_GPIO_Init	4	static
-../SPI/src/spi.c:314:13:spi1_gpio_init	16	static
-../SPI/src/spi.c:343:6:SPI_FLASH_INIT	32	static
-../SPI/src/spi.c:390:6:SPI2_IRQHandler	16	static
-../SPI/src/spi.c:421:6:SPI_FLASH_CONFIG	32	static
-../SPI/src/spi.c:497:6:SPI_FLASH_DECONFIG	4	static
+../SPI/src/spi.c:276:6:SpiSendRecvFlash	32	static
+../SPI/src/spi.c:287:6:SPI_GPIO_Init	4	static
+../SPI/src/spi.c:315:13:spi1_gpio_init	16	static
+../SPI/src/spi.c:344:6:SPI_FLASH_INIT	32	static
+../SPI/src/spi.c:391:6:SPI2_IRQHandler	16	static
+../SPI/src/spi.c:426:6:SPI_FLASH_CONFIG	32	static
+../SPI/src/spi.c:502:6:SPI_FLASH_DECONFIG	4	static

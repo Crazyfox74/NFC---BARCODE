@@ -17,7 +17,7 @@
 #include "rtc_time.h"
 #include "spi.h"
 #include "spiFlash.h"
-
+#include "flashUtils.h"
 
 
 
