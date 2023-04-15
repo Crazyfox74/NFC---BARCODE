@@ -19,7 +19,7 @@ uint16_t stat_reg1;
 uint16_t stat_reg2;
 uint8_t wr_en;
 uint8_t wr_stat_en;
-
+extern uint8_t res_erase;
 
 
 uint8_t CheckMemoryFlash(uint32_t addr_check){
@@ -76,6 +76,18 @@ void Set_Started_Address(uint32_t addr, uint16_t cnt_flash, uint8_t* pBuf){
 
 void Write_data_2Flash(uint32_t addr, uint16_t cnt_flash, uint8_t* pBuf){
 
+	wr_en = spiFlash_wrtEnbl();
+	stat_reg1 = spiFlash_readStatus(CMD_READ_STATUS_REG1);
+	stat_reg2 = spiFlash_readStatus(CMD_READ_STATUS_REG2);
+		if(stat_reg1!=2){
+			wr_stat_en = spiFlash_wrtStatReg();
+			stat_reg1 = spiFlash_readStatus(CMD_READ_STATUS_REG1);
+			stat_reg2 = spiFlash_readStatus(CMD_READ_STATUS_REG2);
+			wr_en = spiFlash_wrtEnbl();
+			stat_reg1 = spiFlash_readStatus(CMD_READ_STATUS_REG1);
+			stat_reg2 = spiFlash_readStatus(CMD_READ_STATUS_REG2);
+						}
+
 
 
 }
@@ -109,5 +121,22 @@ void Set_Cnt_to_Flash(uint32_t addr, uint16_t cnt_flash, uint8_t* pBuf){
 	} while (stat_reg1 & 0x01 );
 }
 
+void Safe_Flash_Erase(uint32_t erase_addr){
+	wr_en = spiFlash_wrtEnbl();
+	stat_reg1 = spiFlash_readStatus(CMD_READ_STATUS_REG1);
+	stat_reg2 = spiFlash_readStatus(CMD_READ_STATUS_REG2);
+	if(stat_reg1!=2){
+		wr_stat_en = spiFlash_wrtStatReg();
+		stat_reg1 = spiFlash_readStatus(CMD_READ_STATUS_REG1);
+		stat_reg2 = spiFlash_readStatus(CMD_READ_STATUS_REG2);
+		wr_en = spiFlash_wrtEnbl();
+		stat_reg1 = spiFlash_readStatus(CMD_READ_STATUS_REG1);
+		stat_reg2 = spiFlash_readStatus(CMD_READ_STATUS_REG2);
+	}
 
+	res_erase = spiFlash_eraseSector(erase_addr);
+	do {
+		stat_reg1 = spiFlash_readStatus(CMD_READ_STATUS_REG1);
+	} while (stat_reg1 & 0x01 );
+}
 

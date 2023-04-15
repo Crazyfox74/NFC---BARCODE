@@ -230,5 +230,7 @@ void nfc_conv2Flash(uint32_t rtc_time, uint32_t data );
 void addr_conv2Flash(uint32_t addr_flash);
 void wr_test_prepare(uint32_t addr_wr, uint16_t cnt);
 uint32_t flash_conv2_addr(uint8_t *padBuf);
+uint32_t flash_conv2_timer(uint8_t *pdBuf);
+void flash_conv2_bcode(uint8_t *pdBuf);
 
 #endif /* INC_PERIF_H_ */

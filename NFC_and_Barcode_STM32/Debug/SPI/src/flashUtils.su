@@ -1,5 +1,6 @@
 ../SPI/src/flashUtils.c:25:9:CheckMemoryFlash	24	static
 ../SPI/src/flashUtils.c:55:6:Set_Started_Address	24	static
 ../SPI/src/flashUtils.c:77:6:Write_data_2Flash	24	static
-../SPI/src/flashUtils.c:84:6:Write_Stat_Reg	8	static
-../SPI/src/flashUtils.c:93:6:Set_Cnt_to_Flash	24	static
+../SPI/src/flashUtils.c:96:6:Write_Stat_Reg	8	static
+../SPI/src/flashUtils.c:105:6:Set_Cnt_to_Flash	24	static
+../SPI/src/flashUtils.c:124:6:Safe_Flash_Erase	16	static

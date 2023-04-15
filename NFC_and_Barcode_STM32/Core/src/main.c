@@ -30,6 +30,7 @@ char g_sBuffer [ BUFFER_LEN + 1 ];
 int g_iBufferLength = 0;
 
 static char g_sBarCode [ USB_STATE_LEN + 1 ];
+static char f_sBarCode [ USB_STATE_LEN + 1 ];
 
 
 static char g_sNfcCode [ USB_STATE_LEN + 1 ];
@@ -184,6 +185,7 @@ uint8_t rdDataBlock[16];
 
 static char s_cal_data[21]="0000-00-00 00:00:00\r\n";
 static char s_scan_d_c[64]="";
+static char s_flash_d_c[64]="";
 static char s_nfc_tag_date[64]="";
 
 static char s_pc_PN532_info1[]="NFC read operation correct";
@@ -234,6 +236,8 @@ static char android_read_settings[]="Reading settings..";
 static char android_last_barcode[]="Reading the last barcode...";
 static char android_last_nfc[]="Reading the last nfc-tag...";
 static char android_last_5records[]="Reading the last 5 records...";
+static char android_empty_bar_mem[]="There is no barcode,empty memory";
+static char android_empty_nfc_mem[]="There is no nfc-tag,empty memory";
 
 char error_cmd[]="*~*";
 
@@ -256,6 +260,9 @@ uint32_t erase_addr;
 uint8_t cnt_flash_t;
 extern uint8_t wr_test_buff[256];
 extern uint8_t rd_test_buff[255];
+extern uint8_t rd_flash_buff[16];
+extern uint8_t data_to_flash[16];
+extern uint16_t cnt_flash;	//количество байт для записи
 uint64_t bcdflash;
 uint64_t nfctflash;
 
@@ -268,14 +275,22 @@ uint32_t nfc_cnt_addr_start;	//количество записей меток
 uint8_t cnt_addr_2Flash;	//количество байт для адреса
 uint8_t cnt_for_addr;
 uint8_t cnt_4cnt;	//количество байт для количества записей
+uint8_t val_cnt;	//для записи счетчика после сканирования
 uint8_t max_record_flash;	//количество байт для макс количества записей
 uint8_t val_max_cnt;	//значение макс количества записей
 uint8_t val_start_cnt;	//начальное значение количества записей
 uint32_t bar_flash_addr;	//адрес для записи штрих-кодов
 uint32_t nfc_flash_addr;	//адрес для записи метки
+uint32_t flash_timer;
+uint32_t bcd_cnt_addr;
+uint32_t nfc_cnt_addr;
+uint8_t last_bcode;
 
 uint8_t start_nfc_addr[4]={0x00,0x00,0x20,0x00};	//начальный адрес для меток
 uint8_t start_bar_addr[4]={0x00,0x00,0x10,0x00};	//начальный адрес для штрих-кодов
+uint8_t bar_arr_test[16]={0x08,0x40,0xce,0x3e,0x48,0x12,0x60,0x80,0x03,0x20,0x00};
+
+extern char fl_bar_buff[16];
 
 
 void LCD_PN532_CreateRunInfoString(){
@@ -474,24 +489,29 @@ int main(void){
 				SpiActive = 0;
 
 
-				while(SpiActive !=0 && SPI_I2S_GetFlagStatus(SPI2,SPI_SR_BSY) != RESET){}
-				SPI_FLASH_CONFIG();
-bcd_addr_start = 0;
-bcd_cnt_addr_start = 32;
-bcd_max_cnt_addr = 64;
+		/*	while(SpiActive !=0 && SPI_I2S_GetFlagStatus(SPI2,SPI_SR_BSY) != RESET){}
+				SPI_FLASH_CONFIG();*/
 
-nfc_addr_start = 96;
-nfc_cnt_addr_start = 128;
-nfc_max_cnt_addr = 160;
+bcd_addr_start = 8192;
+bcd_cnt_addr_start = 0;
+//bcd_max_cnt_addr = 64;
+
+nfc_addr_start = 12288;
+nfc_cnt_addr_start = 4096;
+//nfc_max_cnt_addr = 160;
 
 cnt_addr_2Flash = 4;
 cnt_4cnt = 1;
+cnt_flash = 16;
 
 val_max_cnt = 255;
 val_start_cnt = 0;
 
 erase_addr = 0;
 cnt_flash_t = 255;
+
+
+
 //uint8_t* pmax_cnt = val_max_cnt;
 //uint8_t *pstart_cnt = val_start_cnt;
 
@@ -501,12 +521,12 @@ cnt_flash_t = 255;
 			Set_Cnt_to_Flash(bcd_cnt_addr_start, cnt_4cnt, &val_start_cnt);	//количество штрих-кодов
 			Set_Cnt_to_Flash(bcd_max_cnt_addr, cnt_4cnt, &val_max_cnt);	//макс количесто штрих-кодов
 
-			Set_Started_Address(nfc_addr_start, cnt_addr_2Flash, start_nfc_addr);	//начальный адрес для штрих-кодов
-			Set_Cnt_to_Flash(nfc_cnt_addr_start, cnt_4cnt, &val_start_cnt);	//количество штрих-кодов
-			Set_Cnt_to_Flash(nfc_max_cnt_addr, cnt_4cnt, &val_max_cnt);	//макс количесто штрих-кодов
+			Set_Started_Address(nfc_addr_start, cnt_addr_2Flash, start_nfc_addr);	//начальный адрес для меток
+			Set_Cnt_to_Flash(nfc_cnt_addr_start, cnt_4cnt, &val_start_cnt);	//количество меток
+			Set_Cnt_to_Flash(nfc_max_cnt_addr, cnt_4cnt, &val_max_cnt);	//макс количесто меток
 
 */
-
+/*
 			memset(rd_test_buff,0x00,sizeof(rd_test_buff));	//получение значение адреса для записи
 			spiFlash_Read(bcd_addr_start, cnt_addr_2Flash, rd_test_buff);
 			bar_flash_addr = flash_conv2_addr(rd_test_buff);
@@ -514,15 +534,15 @@ cnt_flash_t = 255;
 			memset(rd_test_buff,0x00,sizeof(rd_test_buff));	//получение значение адреса для записи
 			spiFlash_Read(nfc_addr_start, cnt_addr_2Flash, rd_test_buff);
 			nfc_flash_addr = flash_conv2_addr(rd_test_buff);
+*/
 
-
-		/*		while(SpiActive !=0 && SPI_I2S_GetFlagStatus(SPI2,SPI_SR_BSY) != RESET){}
+				while(SpiActive !=0 && SPI_I2S_GetFlagStatus(SPI2,SPI_SR_BSY) != RESET){}
 				SPI_FLASH_CONFIG();
 
-				erase_addr = 0;
+			erase_addr = 0;
 				cnt_flash_t = 255;
 
-				for(int a = 0; a<4;a++){
+		//		for(int a = 0; a<4;a++){
 					wr_en = spiFlash_wrtEnbl();
 					stat_reg1 = spiFlash_readStatus(CMD_READ_STATUS_REG1);
 					stat_reg2 = spiFlash_readStatus(CMD_READ_STATUS_REG2);
@@ -543,46 +563,58 @@ cnt_flash_t = 255;
 					memset(rd_test_buff,0x00,sizeof(rd_test_buff));
 				//	for(int k = 0; k< 254; k++){
 					spiFlash_Read(erase_addr, cnt_flash_t, rd_test_buff);
-					erase_addr = erase_addr + 4096;
-				}
+					wr_en = spiFlash_wrtEnbl();
+					stat_reg1 = spiFlash_readStatus(CMD_READ_STATUS_REG1);
+					stat_reg2 = spiFlash_readStatus(CMD_READ_STATUS_REG2);
+					if(stat_reg1!=2){
+						wr_stat_en = spiFlash_wrtStatReg();
+						stat_reg1 = spiFlash_readStatus(CMD_READ_STATUS_REG1);
+						stat_reg2 = spiFlash_readStatus(CMD_READ_STATUS_REG2);
+						wr_en = spiFlash_wrtEnbl();
+						stat_reg1 = spiFlash_readStatus(CMD_READ_STATUS_REG1);
+						stat_reg2 = spiFlash_readStatus(CMD_READ_STATUS_REG2);
+					}
 
-*/
+					res_erase = spiFlash_eraseSector(bcd_addr_start);
+					do {
+						stat_reg1 = spiFlash_readStatus(CMD_READ_STATUS_REG1);
+					} while (stat_reg1 & 0x01 );
 
-			/*	jedec_test = spiFlash_readJEDECDesc();
-				wr_test_prepare(erase_addr, cnt_flash_t);
-				erase_addr = 0;
+					memset(rd_test_buff,0x00,sizeof(rd_test_buff));
+				//	for(int k = 0; k< 254; k++){
+					spiFlash_Read(bcd_addr_start, cnt_flash_t, rd_test_buff);
+				//	erase_addr = erase_addr + 4096;
+		//		}
 
-			//	}
+			/*	wr_test_prepare(erase_addr, cnt_addr_2Flash);
 
 				wr_en = spiFlash_wrtEnbl();
 				stat_reg1 = spiFlash_readStatus(CMD_READ_STATUS_REG1);
 				stat_reg2 = spiFlash_readStatus(CMD_READ_STATUS_REG2);
-				spiFlash_write(erase_addr, cnt_flash_t, wr_test_buff);
+				spiFlash_write(erase_addr, cnt_addr_2Flash, wr_test_buff);
 				do {
 					stat_reg1 = spiFlash_readStatus(CMD_READ_STATUS_REG1);
 				} while (stat_reg1 & 0x01 );
-
-				memset(rd_test_buff,0x00,sizeof(rd_test_buff));
-				spiFlash_Read(erase_addr, cnt_flash_t, rd_test_buff);
 */
+				memset(rd_test_buff,0x00,sizeof(rd_test_buff));
+				spiFlash_Read(bcd_cnt_addr_start, cnt_flash_t, rd_test_buff);
+				for(int k = 0; k < 256; k++){
+					if(rd_test_buff[k] == 0xFF){
+						if(k == 0){
+							Set_Cnt_to_Flash(bcd_cnt_addr_start, cnt_4cnt, &val_start_cnt);
+
+						break;
+						}
+					}
+				}
+
+
 
 				SpiActive = 0;
 
 
 			while(SpiActive !=0 && SPI_I2S_GetFlagStatus(SPI2,SPI_SR_BSY) != RESET){}
 				PN532_SPIInit();
-
-
-		/*		versiondata = 0;
-				versiondata = PN532_getFirmwareVersion();//Получениe версии ПО PN532
-
-						if(versiondata){
-							statusDevice=statusDevice|ST_DEV_NFC_NOERR;//установка флага успешного теста NFC
-							PN532_FirmWareVersion2String (versiondata);
-							b_rertyes=PN532_setPassiveActivationRetries(0xFF);
-							b_discannfc=0;
-						}
-*/
 
 				 b_getversion=ENABLE;
 				 cntbyteversion=0;
@@ -863,6 +895,106 @@ EnableTimer1Interrupt();
 							case 201://чтение последнего штрих-кода
 								Usart2_SendData(android_last_barcode,strlen(android_last_barcode));
 								Usart2_SendData(s_newline,strlen(s_newline));
+
+							/*		while(SpiActive !=0 && SPI_I2S_GetFlagStatus(SPI2,SPI_SR_BSY) != RESET){}
+									SPI_FLASH_CONFIG();
+
+
+
+								memset(rd_flash_buff,0x00,sizeof(rd_flash_buff));	//получение значения счетчика записей
+								spiFlash_Read(bcd_cnt_addr_start, cnt_4cnt, rd_flash_buff);
+								val_cnt = rd_flash_buff[0];
+								if(val_cnt == 0){
+									bar_flash_addr = 4096 + 255 * 16;
+									spiFlash_Read(bar_flash_addr, cnt_addr_2Flash, rd_flash_buff);
+									if(rd_flash_buff[0] == 0xff){
+										Usart2_SendData(android_empty_bar_mem,strlen(android_empty_bar_mem));
+										Usart2_SendData(s_newline,strlen(s_newline));
+									}
+									flash_timer = flash_conv2_timer(rd_flash_buff);
+									timer_to_cal(flash_timer, &rtc_time);
+									s_cal_data[0] = 0x30 + (rtc_time.year/1000%10);
+									s_cal_data[1] = 0x30 + (rtc_time.year/100%10);
+									s_cal_data[2] = 0x30 + (rtc_time.year/10%10);
+									s_cal_data[3] = 0x30 + (rtc_time.year%10);
+
+									s_cal_data[5] = 0x30 + (rtc_time.mon/10);
+									s_cal_data[6] = 0x30 + (rtc_time.mon%10);
+
+									s_cal_data[8] = 0x30 + (rtc_time.mday/10);
+									s_cal_data[9] = 0x30 + (rtc_time.mday%10);
+
+									s_cal_data[11] = 0x30 + (rtc_time.hour/10);
+									s_cal_data[12] = 0x30 + (rtc_time.hour%10);
+
+									s_cal_data[14] = 0x30 + (rtc_time.min/10);
+									s_cal_data[15] = 0x30 + (rtc_time.min%10);
+
+									s_cal_data[17] = 0x30 + (rtc_time.sec/10);
+									s_cal_data[18] = 0x30 + (rtc_time.sec%10);
+
+									flash_conv2_bcode(rd_flash_buff);
+									memset(f_sBarCode,0,strlen(f_sBarCode));
+									strlcpy ( f_sBarCode, (const char *)s_lcd_barcode_read, USB_STATE_LEN );
+									strcat(f_sBarCode,fl_bar_buff );
+									strncat(s_flash_d_c, s_cal_data, 19);
+									strncat(s_flash_d_c, s_space, strlen(s_space));
+									strncat(s_flash_d_c, g_sBarCode, strlen(f_sBarCode));
+									strncat(s_flash_d_c, s_newline, strlen(s_newline));
+
+									Usart2_SendData(s_flash_d_c,strlen(s_flash_d_c));
+									Usart2_SendData(s_newline,strlen(s_newline));
+
+									memset(s_flash_d_c, 0, strlen(s_flash_d_c));
+
+
+									}
+								if(val_cnt > 0 && val_cnt < 256){	//количество записей удовлетворяет диапазону
+									bar_flash_addr = 4096 + (val_cnt-1) * 16;
+									spiFlash_Read(bar_flash_addr, cnt_addr_2Flash, rd_flash_buff);
+									flash_timer = flash_conv2_timer(rd_flash_buff);
+									timer_to_cal(flash_timer, &rtc_time);
+									s_cal_data[0] = 0x30 + (rtc_time.year/1000%10);
+									s_cal_data[1] = 0x30 + (rtc_time.year/100%10);
+									s_cal_data[2] = 0x30 + (rtc_time.year/10%10);
+									s_cal_data[3] = 0x30 + (rtc_time.year%10);
+
+									s_cal_data[5] = 0x30 + (rtc_time.mon/10);
+									s_cal_data[6] = 0x30 + (rtc_time.mon%10);
+
+									s_cal_data[8] = 0x30 + (rtc_time.mday/10);
+									s_cal_data[9] = 0x30 + (rtc_time.mday%10);
+
+									s_cal_data[11] = 0x30 + (rtc_time.hour/10);
+									s_cal_data[12] = 0x30 + (rtc_time.hour%10);
+
+									s_cal_data[14] = 0x30 + (rtc_time.min/10);
+									s_cal_data[15] = 0x30 + (rtc_time.min%10);
+
+									s_cal_data[17] = 0x30 + (rtc_time.sec/10);
+									s_cal_data[18] = 0x30 + (rtc_time.sec%10);
+
+									flash_conv2_bcode(rd_flash_buff);
+
+									memset(f_sBarCode,0,strlen(f_sBarCode));
+									strlcpy ( f_sBarCode, (const char *)s_lcd_barcode_read, USB_STATE_LEN );
+									strcat(f_sBarCode,fl_bar_buff );
+									strncat(s_flash_d_c, s_cal_data, 19);
+									strncat(s_flash_d_c, s_space, strlen(s_space));
+									strncat(s_flash_d_c, g_sBarCode, strlen(f_sBarCode));
+									strncat(s_flash_d_c, s_newline, strlen(s_newline));
+
+									Usart2_SendData(s_flash_d_c,strlen(s_flash_d_c));
+									Usart2_SendData(s_newline,strlen(s_newline));
+
+									memset(s_flash_d_c, 0, strlen(s_flash_d_c));
+
+									//конвертация принятых данных
+
+								}
+								SpiActive = 0;
+								PN532_SPIInit();
+*/
 								break;
 							case 202://чтение последней NFC-метки
 								Usart2_SendData(android_last_nfc,strlen(android_last_nfc));
@@ -883,28 +1015,7 @@ EnableTimer1Interrupt();
 
 					}
 
-				//	strtok(date_sBuffer, "\r\n");
 
-				//	char *dBuffer = date_sBuffer;
-
-				//	strtok(date_sBuffer, "\r\n");
-
-				/*	while (strpbrk ( dBuffer, "\n\xFF" ) != NULL) {
-						dBuffer++;
-					}
-*/
-			/*		if(strcmp(flash_bcode, date_sBuffer) == 0){
-
-								} else {
-
-								}
-		*/
-					//memset(date_sCode,0,strlen(date_sCode));
-					//strlcpy ( date_sCode, (const char *)s_lcd_barcode_read, USB_STATE_LEN );
-					//strcat(date_sCode,dBuffer );
-
-				//	Usart2_SendData(s_pc_barcode,strlen(s_pc_barcode));
-				//	Usart2_SendData(s_newline,strlen(s_newline));
 
 					Usart2_SendData(date_sBuffer,strlen(date_sBuffer));
 					Usart2_SendData(s_newline,strlen(s_newline));
@@ -912,12 +1023,7 @@ EnableTimer1Interrupt();
 
 
 					date_iBufferLength=0;
-				//	int strDateLength = strlen(date_sBuffer) + 1;
-				//	date_iBufferLength -= strDateLength;
-				/*	memmove ( date_sBuffer, date_sBuffer + strDateLength,
 
-							BUFFER_LEN +1 - strDateLength );
-*/
 					memset(date_sBuffer, 0, strlen(date_sBuffer));
 				}
 
@@ -949,12 +1055,88 @@ EnableTimer1Interrupt();
 						bcdflash = bcode_conv_to_flash(tim, g_sBuffer);
 						data_conv2Flash(tim, bcdflash);
 
-					//	while(SpiActive !=0 && SPI_I2S_GetFlagStatus(SPI2,SPI_SR_BSY) != RESET){}
-					//	SPI_FLASH_CONFIG();
 
 
 
+						while(SpiActive !=0 && SPI_I2S_GetFlagStatus(SPI2,SPI_SR_BSY) != RESET){}
+						SPI_FLASH_CONFIG();
 
+
+						memset(rd_flash_buff,0x00,sizeof(rd_flash_buff));	//получение значения счетчика записей
+						spiFlash_Read(bcd_cnt_addr_start, cnt_flash_t, rd_test_buff);
+						for(int j = 0; j < 7; j++){
+							if(rd_test_buff[j] == 0xFF){
+								val_cnt = rd_test_buff[j-1];
+								bcd_cnt_addr = j;
+								break;
+							}
+						}
+					//	val_cnt = rd_flash_buff[0];
+					/*	if(val_cnt == 0){	//если нет записей
+						//	memset(rd_flash_buff,0x00,sizeof(rd_flash_buff));	//получение значение адреса для записи
+						//	spiFlash_Read(bcd_addr_start, cnt_addr_2Flash, rd_flash_buff);
+						//	bar_flash_addr = flash_conv2_addr(rd_flash_buff);
+						//	Write_data_2Flash(bar_flash_addr, cnt_flash, data_to_flash);
+							val_cnt++;
+							Set_Cnt_to_Flash(bcd_cnt_addr, cnt_4cnt, &val_cnt);	//количество штрих-кодов
+							//break;
+						}*/
+						if(val_cnt< 5){	//количество записей удовлетворяет диапазону
+							memset(rd_test_buff,0x00,sizeof(rd_test_buff));	//получение значение адреса для записи
+							spiFlash_Read(bcd_addr_start, cnt_flash_t, rd_test_buff);
+							bar_flash_addr = 8192 + val_cnt * 16;
+							Write_data_2Flash(bar_flash_addr, cnt_flash, data_to_flash);
+							spiFlash_write(bar_flash_addr, cnt_flash, data_to_flash);
+							do {
+									stat_reg1 = spiFlash_readStatus(CMD_READ_STATUS_REG1);
+							} while (stat_reg1 & 0x01 );
+							val_cnt++;
+							Set_Cnt_to_Flash(bcd_cnt_addr, cnt_4cnt, &val_cnt);	//количество штрих-кодов
+						//	break;
+
+						}
+						if(bcd_cnt_addr == 6 ){		//стирка если больше диапазона
+							memset(rd_test_buff,0x00,sizeof(rd_test_buff));	//получение значение адреса для записи
+							spiFlash_Read(bcd_addr_start, cnt_flash_t, rd_test_buff);
+							bcd_cnt_addr = 0;
+							Write_data_2Flash(bar_flash_addr, cnt_flash, data_to_flash);
+							bar_flash_addr = 8192;
+							Safe_Flash_Erase(bar_flash_addr);
+							Write_data_2Flash(bar_flash_addr, cnt_flash, data_to_flash);
+							Safe_Flash_Erase(bcd_cnt_addr);
+							val_cnt = 0;
+							Set_Cnt_to_Flash(bcd_cnt_addr, cnt_4cnt, &val_cnt);	//обнуление счетчика записей
+							Write_data_2Flash(bar_flash_addr, cnt_flash, data_to_flash);
+							spiFlash_write(bar_flash_addr, cnt_flash, data_to_flash);
+							do {
+									stat_reg1 = spiFlash_readStatus(CMD_READ_STATUS_REG1);
+							} while (stat_reg1 & 0x01 );
+							bcd_cnt_addr = 1;
+							val_cnt = 1;
+							Set_Cnt_to_Flash(bcd_cnt_addr, cnt_4cnt, &val_cnt);	//обнуление счетчика записей
+						//	break;
+						}
+
+						memset(rd_test_buff,0x00,sizeof(rd_test_buff));
+						spiFlash_Read(erase_addr, cnt_flash_t, rd_test_buff);
+
+						memset(rd_test_buff,0x00,sizeof(rd_test_buff));
+						spiFlash_Read(bar_flash_addr, cnt_flash_t, rd_test_buff);
+					/*	memset(rd_flash_buff,0x00,sizeof(rd_flash_buff));	//получение значения счетчика записей
+						spiFlash_Read(bcd_cnt_addr_start, cnt_4cnt, rd_flash_buff);*/
+			/*			memset(rd_flash_buff,0xff,sizeof(rd_flash_buff));	//получение значения счетчика записей
+						spiFlash_Read(bar_flash_addr, cnt_flash, rd_flash_buff);
+						memset(rd_test_buff,0x00,sizeof(rd_test_buff));
+						spiFlash_Read(bar_flash_addr, cnt_flash_t, rd_test_buff);
+*/
+						SpiActive = 0;
+						PN532_SPIInit();
+
+/*
+						memset(rd_flash_buff,0x00,sizeof(rd_flash_buff));	//получение значение адреса для записи
+						spiFlash_Read(bcd_addr_start, cnt_addr_2Flash, rd_flash_buff);
+						bar_flash_addr = flash_conv2_addr(rd_test_buff);
+*/
 
 						s_cal_data[0] = 0x30 + (rtc_time.year/1000%10);
 						s_cal_data[1] = 0x30 + (rtc_time.year/100%10);
@@ -1004,10 +1186,6 @@ EnableTimer1Interrupt();
 							BUFFER_LEN + 1 - strLength );
 
 
-
-
-
-
 		/*
 					s_cal_sec[0] = 0x30 + (unix_time.sec/10);
 					s_cal_sec[1] = 0x30 + (unix_time.sec%10);
@@ -1018,8 +1196,6 @@ EnableTimer1Interrupt();
 		*/
 
 					//*xxx*yyyy-MM-dd HH:mm:ss
-
-
 
 
 					strncat(s_scan_d_c, s_cal_data, 19);
@@ -1291,4 +1467,5 @@ EnableTimer1Interrupt();
 
 
 	}
+
 }

@@ -61,8 +61,10 @@ uint8_t addr_to_flash[4];
 
 uint8_t wr_test_buff[256];
 uint8_t rd_test_buff[256];
+uint8_t rd_flash_buff[16];
 uint32_t wr_test_addr;
 uint8_t addr_to_wr[4];
+char fl_bar_buff[16];
 
 
 NVIC_InitTypeDef        NVIC_InitTmr1Structure;
@@ -681,6 +683,9 @@ uint64_t bcode_conv_to_flash(uint32_t rtc_time, char *bar_buff){
 
 	uint8_t s;
 	char *pBar = bar_buff;
+	if(bar_buff[0] =='\n'){
+		*pBar++;
+	}
 	for(int i = 0; i < 13; i++){
 		barcode[i] = *pBar++;
 	}
@@ -718,13 +723,13 @@ void nfc_conv_to_flash(uint32_t rtc_time, uint32_t nfc_tag ){
 }
 
 
-void data_conv2Flash(uint32_t rtc_time, uint64_t data ){
+void data_conv2Flash(uint32_t cnt_timer, uint64_t data ){
 
 
-	data_to_flash[0]=(rtc_time >> 24) & 0xFF;
-	data_to_flash[1]=(rtc_time >> 16) & 0xFF;
-	data_to_flash[2]=(rtc_time >> 8) & 0xFF;
-	data_to_flash[3]=rtc_time & 0xFF;
+	data_to_flash[0]=(cnt_timer >> 24) & 0xFF;
+	data_to_flash[1]=(cnt_timer >> 16) & 0xFF;
+	data_to_flash[2]=(cnt_timer >> 8) & 0xFF;
+	data_to_flash[3]=cnt_timer & 0xFF;
 
 	data_to_flash[4]=(data >> 48) & 0xFF;
 	data_to_flash[5]=(data >> 40) & 0xFF;
@@ -768,6 +773,62 @@ uint32_t flash_conv2_addr(uint8_t *padBuf){
 	return addr2_wr;
 
 }
+
+uint32_t flash_conv2_timer(uint8_t *pdBuf){
+
+	uint32_t timer_flash = (pdBuf[0] << 24) | (pdBuf[1] << 16) | (pdBuf[2] << 8) | pdBuf[3];
+	return timer_flash;
+
+}
+
+void flash_conv2_bcode(uint8_t *pdBuf){
+
+/*	char *pbar_buff = fl_bar_buff;
+	pbar_buff = (pdBuf[4] >> 4) + 0x30;
+	pbar_buff++;
+	pbar_buff = (pdBuf[4] && 0x0F) + 0x30;
+	pbar_buff++;
+	pbar_buff = (pdBuf[5] >> 4) + 0x30;
+	pbar_buff++;
+	pbar_buff = (pdBuf[5] && 0x0F) + 0x30;
+	pbar_buff++;
+	pbar_buff = (pdBuf[6] >> 4) + 0x30;
+	pbar_buff++;
+	pbar_buff = (pdBuf[6] && 0x0F) + 0x30;
+	pbar_buff++;
+	pbar_buff = (pdBuf[7] >> 4) + 0x30;
+	pbar_buff++;
+	pbar_buff = (pdBuf[7] && 0x0F) + 0x30;
+	pbar_buff++;
+	pbar_buff = (pdBuf[8] >> 4) + 0x30;
+	pbar_buff++;
+	pbar_buff = (pdBuf[8] && 0x0F) + 0x30;
+	pbar_buff++;
+	pbar_buff = (pdBuf[9] >> 4) + 0x30;
+	pbar_buff++;
+	pbar_buff = (pdBuf[9] && 0x0F) + 0x30;
+	pbar_buff++;
+	pbar_buff = (pdBuf[10] >> 4) + 0x30;
+	pbar_buff++;
+/*	pbar_buff = (pdBuf[9] && 0x0F) + 0x30;
+	pbar_buff++;*/
+
+	fl_bar_buff[0] = (pdBuf[4] >> 4) + 0x30;
+	fl_bar_buff[1] = (pdBuf[4] && 0x0F) + 0x30;
+	fl_bar_buff[2] = (pdBuf[5] >> 4) + 0x30;
+	fl_bar_buff[3] = (pdBuf[5] && 0x0F) + 0x30;
+	fl_bar_buff[4] = (pdBuf[6] >> 4) + 0x30;
+	fl_bar_buff[5] = (pdBuf[6] && 0x0F) + 0x30;
+	fl_bar_buff[6] = (pdBuf[7] >> 4) + 0x30;
+	fl_bar_buff[7] = (pdBuf[7] && 0x0F) + 0x30;
+	fl_bar_buff[8] = (pdBuf[8] >> 4) + 0x30;
+	fl_bar_buff[9] = (pdBuf[8] && 0x0F) + 0x30;
+	fl_bar_buff[10] = (pdBuf[9] >> 4) + 0x30;
+	fl_bar_buff[11] = (pdBuf[9] && 0x0F) + 0x30;
+	fl_bar_buff[12] = (pdBuf[10] >> 4) + 0x30;
+
+}
+
 
 
 void wr_test_prepare(uint32_t addr_wr, uint16_t cnt){
