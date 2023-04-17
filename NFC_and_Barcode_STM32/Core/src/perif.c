@@ -53,10 +53,12 @@ extern uint8_t outwrdata[];
 uint32_t bcode_to_flash[4];
 uint64_t bcode;
 char barcode[64];
+char nfc_uid_arr[10];
 
 uint32_t nfc_to_flash[2];
 
 uint8_t data_to_flash[16];
+uint8_t nfc_data_2flash[16];
 uint8_t addr_to_flash[4];
 
 uint8_t wr_test_buff[256];
@@ -742,18 +744,18 @@ void data_conv2Flash(uint32_t cnt_timer, uint64_t data ){
 
 }
 
-void nfc_conv2Flash(uint32_t rtc_time, uint32_t data ){
+void nfc_conv2Flash(uint32_t cnt_timer, uint32_t data ){
 
 
-	data_to_flash[0]=(rtc_time >> 24) & 0xFF;
-	data_to_flash[1]=(rtc_time >> 16) & 0xFF;
-	data_to_flash[2]=(rtc_time >> 8) & 0xFF;
-	data_to_flash[3]=rtc_time & 0xFF;
+	nfc_data_2flash[0]=(cnt_timer >> 24) & 0xFF;
+	nfc_data_2flash[1]=(cnt_timer >> 16) & 0xFF;
+	nfc_data_2flash[2]=(cnt_timer >> 8) & 0xFF;
+	nfc_data_2flash[3]=cnt_timer & 0xFF;
 
-	data_to_flash[4]=(data >> 24) & 0xFF;
-	data_to_flash[5]=(data >> 16) & 0xFF;
-	data_to_flash[6]=(data >> 8) & 0xFF;
-	data_to_flash[7]=data & 0xFF;
+	nfc_data_2flash[4]=(data >> 24) & 0xFF;
+	nfc_data_2flash[5]=(data >> 16) & 0xFF;
+	nfc_data_2flash[6]=(data >> 8) & 0xFF;
+	nfc_data_2flash[7]=data & 0xFF;
 
 
 }
@@ -781,51 +783,45 @@ uint32_t flash_conv2_timer(uint8_t *pdBuf){
 
 }
 
-void flash_conv2_bcode(uint8_t *pdBuf){
+void flash_conv2_bcode(){
 
-/*	char *pbar_buff = fl_bar_buff;
-	pbar_buff = (pdBuf[4] >> 4) + 0x30;
-	pbar_buff++;
-	pbar_buff = (pdBuf[4] && 0x0F) + 0x30;
-	pbar_buff++;
-	pbar_buff = (pdBuf[5] >> 4) + 0x30;
-	pbar_buff++;
-	pbar_buff = (pdBuf[5] && 0x0F) + 0x30;
-	pbar_buff++;
-	pbar_buff = (pdBuf[6] >> 4) + 0x30;
-	pbar_buff++;
-	pbar_buff = (pdBuf[6] && 0x0F) + 0x30;
-	pbar_buff++;
-	pbar_buff = (pdBuf[7] >> 4) + 0x30;
-	pbar_buff++;
-	pbar_buff = (pdBuf[7] && 0x0F) + 0x30;
-	pbar_buff++;
-	pbar_buff = (pdBuf[8] >> 4) + 0x30;
-	pbar_buff++;
-	pbar_buff = (pdBuf[8] && 0x0F) + 0x30;
-	pbar_buff++;
-	pbar_buff = (pdBuf[9] >> 4) + 0x30;
-	pbar_buff++;
-	pbar_buff = (pdBuf[9] && 0x0F) + 0x30;
-	pbar_buff++;
-	pbar_buff = (pdBuf[10] >> 4) + 0x30;
-	pbar_buff++;
-/*	pbar_buff = (pdBuf[9] && 0x0F) + 0x30;
-	pbar_buff++;*/
+	fl_bar_buff[0] = (rd_flash_buff[4] >> 4) + 0x30;
+	fl_bar_buff[1] = (rd_flash_buff[4] & 0x0F) + 0x30;
+	fl_bar_buff[2] = (rd_flash_buff[5] >> 4) + 0x30;
+	fl_bar_buff[3] = (rd_flash_buff[5] & 0x0F) + 0x30;
+	fl_bar_buff[4] = (rd_flash_buff[6] >> 4) + 0x30;
+	fl_bar_buff[5] = (rd_flash_buff[6] & 0x0F) + 0x30;
+	fl_bar_buff[6] = (rd_flash_buff[7] >> 4) + 0x30;
+	fl_bar_buff[7] = (rd_flash_buff[7] & 0x0F) + 0x30;
+	fl_bar_buff[8] = (rd_flash_buff[8] >> 4) + 0x30;
+	fl_bar_buff[9] = (rd_flash_buff[8] & 0x0F) + 0x30;
+	fl_bar_buff[10] = (rd_flash_buff[9] >> 4) + 0x30;
+	fl_bar_buff[11] = (rd_flash_buff[9] & 0x0F) + 0x30;
+	fl_bar_buff[12] = (rd_flash_buff[10] >> 4) + 0x30;
 
-	fl_bar_buff[0] = (pdBuf[4] >> 4) + 0x30;
-	fl_bar_buff[1] = (pdBuf[4] && 0x0F) + 0x30;
-	fl_bar_buff[2] = (pdBuf[5] >> 4) + 0x30;
-	fl_bar_buff[3] = (pdBuf[5] && 0x0F) + 0x30;
-	fl_bar_buff[4] = (pdBuf[6] >> 4) + 0x30;
-	fl_bar_buff[5] = (pdBuf[6] && 0x0F) + 0x30;
-	fl_bar_buff[6] = (pdBuf[7] >> 4) + 0x30;
-	fl_bar_buff[7] = (pdBuf[7] && 0x0F) + 0x30;
-	fl_bar_buff[8] = (pdBuf[8] >> 4) + 0x30;
-	fl_bar_buff[9] = (pdBuf[8] && 0x0F) + 0x30;
-	fl_bar_buff[10] = (pdBuf[9] >> 4) + 0x30;
-	fl_bar_buff[11] = (pdBuf[9] && 0x0F) + 0x30;
-	fl_bar_buff[12] = (pdBuf[10] >> 4) + 0x30;
+}
+
+uint32_t flash_conv2_uid(uint8_t *pdBuf){
+
+	uint32_t decuid_flash = (pdBuf[4] << 24) | (pdBuf[5] << 16) | (pdBuf[6] << 8) | pdBuf[7];
+	return decuid_flash;
+
+}
+
+void flash_conv2_nfc(uint32_t flash_nfc_uid ){
+
+
+	nfc_uid_arr[0] = 0x30+(flash_nfc_uid/1000000000);
+	nfc_uid_arr[1] = 0x30+(flash_nfc_uid/100000000%10);
+	nfc_uid_arr[2] = 0x30+(flash_nfc_uid/10000000%10);
+	nfc_uid_arr[3] = 0x30+(flash_nfc_uid/1000000%10);
+	nfc_uid_arr[4] = 0x30+(flash_nfc_uid/100000%10);
+	nfc_uid_arr[5] = 0x30+(flash_nfc_uid/10000%10);
+	nfc_uid_arr[6] = 0x30+(flash_nfc_uid/1000%10);
+	nfc_uid_arr[7] = 0x30+(flash_nfc_uid/100%10);
+	nfc_uid_arr[8] = 0x30+(flash_nfc_uid/10%10);
+	nfc_uid_arr[9] = 0x30+(flash_nfc_uid%10);
+
 
 }
 

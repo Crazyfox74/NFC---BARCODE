@@ -1,6 +1,6 @@
 D:/Freertos tests/NFC_and_Barcode_STM32/CMSIS/inc/core_cm3.h:1390:22:NVIC_SetPriority	16	static
 D:/Freertos tests/NFC_and_Barcode_STM32/CMSIS/inc/core_cm3.h:1517:26:SysTick_Config	16	static
-../Core/src/main.c:296:6:LCD_PN532_CreateRunInfoString	8	static
-../Core/src/main.c:312:6:LCD_BAR_CreateRunInfoString	16	static
-../Core/src/main.c:341:9:PN532_Write_Data	80	static
-../Core/src/main.c:400:5:main	80	static
+../Core/src/main.c:300:6:LCD_PN532_CreateRunInfoString	8	static
+../Core/src/main.c:316:6:LCD_BAR_CreateRunInfoString	16	static
+../Core/src/main.c:345:9:PN532_Write_Data	80	static
+../Core/src/main.c:404:5:main	96	static
