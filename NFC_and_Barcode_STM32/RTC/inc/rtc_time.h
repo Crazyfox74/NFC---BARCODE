@@ -41,6 +41,6 @@ typedef struct
 void timer_to_cal (unsigned long timer, rtc_cal * rtc_time);
 unsigned long cal_to_timer (rtc_cal * rtc_time);
 uint8_t convert_time_from_android(rtc_cal *rtc_time, char *date);
-
+void convert_time_2android(rtc_cal *rtc_time);
 
 #endif /* INC_RTC_TIME_H_ */

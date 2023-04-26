@@ -87,7 +87,10 @@ void Write_data_2Flash(uint32_t addr, uint16_t cnt_flash, uint8_t* pBuf){
 			stat_reg1 = spiFlash_readStatus(CMD_READ_STATUS_REG1);
 			stat_reg2 = spiFlash_readStatus(CMD_READ_STATUS_REG2);
 						}
-
+	spiFlash_write(addr, cnt_flash, pBuf);
+	do {
+		stat_reg1 = spiFlash_readStatus(CMD_READ_STATUS_REG1);
+	} while (stat_reg1 & 0x01 );
 
 
 }

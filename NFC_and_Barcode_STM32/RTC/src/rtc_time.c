@@ -1,5 +1,7 @@
 #include "rtc_time.h"
 
+extern char s_cal_data[21];
+
 void timer_to_cal (unsigned long timer, rtc_cal * rtc_time)
 {
 	unsigned long a;
@@ -104,5 +106,28 @@ uint8_t convert_time_from_android(rtc_cal *rtc_time, char *date){
 	return res_date;
 //	if(date[])
 
+}
+
+
+void convert_time_2android(rtc_cal *rtc_time){
+	s_cal_data[0] = 0x30 + (rtc_time->year/1000%10);
+	s_cal_data[1] = 0x30 + (rtc_time->year/100%10);
+	s_cal_data[2] = 0x30 + (rtc_time->year/10%10);
+	s_cal_data[3] = 0x30 + (rtc_time->year%10);
+
+	s_cal_data[5] = 0x30 + (rtc_time->mon/10);
+	s_cal_data[6] = 0x30 + (rtc_time->mon%10);
+
+	s_cal_data[8] = 0x30 + (rtc_time->mday/10);
+	s_cal_data[9] = 0x30 + (rtc_time->mday%10);
+
+	s_cal_data[11] = 0x30 + (rtc_time->hour/10);
+	s_cal_data[12] = 0x30 + (rtc_time->hour%10);
+
+	s_cal_data[14] = 0x30 + (rtc_time->min/10);
+	s_cal_data[15] = 0x30 + (rtc_time->min%10);
+
+	s_cal_data[17] = 0x30 + (rtc_time->sec/10);
+	s_cal_data[18] = 0x30 + (rtc_time->sec%10);
 }
 
